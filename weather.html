@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<title>New Lenox Weather</title>
+
+<style>
+    #container {
+      text-align: center;
+    }
+    #container > div {
+      max-height: 100px; /* Declare your value. Can be in relative units. */
+      display: inline-block;
+      vertical-align: top;
+
+      /* IE fix. */
+      *display: inline;
+      zoom: 1;
+    }
+    #container:after {
+      content: "";
+      width: 100%;
+      display: inline-block;
+    }
+</style>
+<script>
+    function getJSON(myRequest){
+        fetch(myRequest)                            // get the geo info
+          .then(response => response.json())        // convert the json into arrays
+          .then(data => {                           // use the arrays
+            fetch(data.properties.forecast)         // get the forecast link
+                .then(response => response.json())  // convert the forecast into arrays
+                .then(data => {                     // use the arrays
+                    let table = document.querySelector("table"); // table =  document.createElement("table");
+                    generateTable(table, data.properties.periods);
+                    //document.body.appendChild(table);
+                  }
+                )
+            }
+          )
+    }
+
+    function generatePTCell(row,txt,em){
+        cell = row.insertCell();
+        text = document.createTextNode(txt);
+        cell.appendChild(text);
+        cell.style.textAlign = "center";
+        cell.style.height = em+"em";
+        cell.style.vAlign = "top";
+    }
+
+    function generateTable(table, data) {
+      let row = table.insertRow();
+      for (let element of data) {
+        tcell = row.insertCell();   // insert a new td
+        tcell.style.width = "7%";
+        tcell.style.border = "solid black 1px";
+        ptable = document.createElement("table");  // create a new period table
+        prow = ptable.insertRow();
+        generatePTCell(prow,element.name,3);       // set period name
+        prow = ptable.insertRow();
+        cell = prow.insertCell();
+        cell.style.textAlign = "center";
+        img = document.createElement("IMG");       // create the icon
+        img.title = element.detailedForecast;
+        img.src = element.icon;
+        cell.appendChild(img);
+        prow = ptable.insertRow();
+        generatePTCell(prow,element.shortForecast,5); // short forecast
+        prow = ptable.insertRow();
+        generatePTCell(prow,element.temperature + element.temperatureUnit,1.5)  // Temp
+        prow = ptable.insertRow();
+        generatePTCell(prow,element.windSpeed + "   " + element.windDirection,2); // wind
+        tcell.appendChild(ptable);                  // append the new period table to the new td
+      }
+    }
+
+    getJSON('https://api.weather.gov/points/41.5,-87.95');
+
+</script>
+</head>
+<body>
+<table></table>
+<div id="container">
+  <div>
+<img src="https://radar.weather.gov/ridge/lite/KLOT_loop.gif" height='500'>
+</div>
+  <div>
+<img src="https://radar.weather.gov/ridge/lite/CENTGRLAKES_loop.gif" height='500'></div>
+  <div>
+<img src="https://radar.weather.gov/ridge/lite/CONUS_loop.gif" height='500'></div>
+</div>
+</body>
+</html>
+
